@@ -147,3 +147,69 @@ A real step from the quicksort run:
 > **Remarks:** `loop not vectorized: call instruction cannot be vectorized (x3)` …
 > **Agent:** `loop-rotate licm indvars sroa instcombine`, *"Apply loop rotation to simplify the loop structure, followed by LICM and indvars"*
 > **Result:** 0.229 s vs 0.240 s at `-O3`: **1.04× faster**, with a fraction of `-O3`'s passes.
+
+## The cost model
+
+`IRFeatures` (a C++ pass plugin, [`plugin/IRFeatures.cpp`](plugin/IRFeatures.cpp)) turns each program into numbers: functions, loops, innermost loops, max loop depth, instructions inside loops, loads, stores, GEPs, PHIs, calls, FP and vector instructions. Each pipeline is encoded as per-pass counts plus where each pass first appears.
+
+An XGBoost regressor predicts `log(speedup vs -O3)` and is tested **leave-one-benchmark-out**: the model scoring conv2d has never seen a conv2d measurement.
+
+| Held-out metric | Result |
+|---|---|
+| Mean Spearman rank correlation | **0.43** (best: spmv 0.81, conv2d 0.71) |
+| Top-ranked pipeline within 5% of the true best | **8 of 12** benchmarks |
+
+Cost-model-guided search then scores 3,000 candidates for free and spends the real budget on the top 25.
+
+## What I learned
+
+Four bugs I hit along the way, each now with a fix (and most with a test):
+
+1. **Low-bit LCG randomness.** The first LCS benchmark printed a checksum of `0`. The low 2 bits of a power-of-two LCG repeat every 4 calls, so the two "random" strings never shared a letter. Small ranges are now drawn from the high bits.
+2. **macOS kills unsigned binaries.** Every candidate died with SIGKILL. Homebrew's clang left arm64 binaries unsigned; linking through the system driver signs them.
+3. **The first run lies.** A freshly linked binary's first launch pays for code-signature checks, which made a 0.055 s kernel look like 0.19 s, and the early-stop rule then recorded that cold time. Every binary now gets an untimed warm-up run, and early stopping needs two slow timed runs.
+4. **Search from zero can't reach -O3 in 25 tries.** Random pass orders lost 5× on conv2d because rebuilding O3's vectorization from single passes is very unlikely. Adding `O1`/`O2`/`O3` as macro-actions (as CompilerGym does) lets search build *on top of* standard pipelines.
+
+## Run it
+
+Requires macOS or Linux, LLVM 23 (`brew install llvm`), Python 3.12, and [Ollama](https://ollama.com) with `llama3.1` for the agent.
+
+```bash
+git clone https://github.com/aryaMehta26/passpilot.git
+cd passpilot
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+make plugin                                   # build the C++ IRFeatures pass plugin
+make test                                     # 27 tests
+python -m passpilot run --bench crc32 quicksort --budget 10   # quick run
+python -m passpilot run                       # the full experiment (resumable)
+python -m passpilot report                    # charts + tables
+```
+
+Set `LLVM_PREFIX` if LLVM isn't in `/opt/homebrew/opt/llvm`.
+
+<details>
+<summary><b>Project layout</b></summary>
+
+```
+passpilot/
+├── benchmarks/            # 12 C kernels + bench.h (seeded LCG, checksum output)
+├── plugin/IRFeatures.cpp  # LLVM pass plugin (C++): IR features as JSON
+├── passpilot/
+│   ├── config.py          # pass catalog with adaptor nesting, budgets, paths
+│   ├── pipeline.py        # validate a pass list → opt pipeline string
+│   ├── toolchain.py       # compile, link, warm up, time, check correctness
+│   ├── features.py        # IR features + pipeline encoding
+│   ├── remarks.py         # LLVM missed-optimization remarks
+│   ├── evaluator.py       # shared budget, cache, per-candidate log
+│   ├── search.py          # random search, genetic algorithm
+│   ├── agent.py           # LLM agent: prompt, JSON interface, repair, fallback
+│   ├── costmodel.py       # XGBoost cost model, leave-one-benchmark-out
+│   ├── experiment.py      # baselines → search → cost model → confirm
+│   └── report.py          # charts and tables
+├── tests/                 # unit tests + LLVM integration tests
+├── data/                  # every evaluation, confirmed results, summary.json
+└── docs/                  # header and charts
+```
+</details>
