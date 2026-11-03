@@ -1,0 +1,9 @@
+numpy
+pandas
+scipy
+xgboost
+scikit-learn
+matplotlib
+tabulate
+requests
+pytest
