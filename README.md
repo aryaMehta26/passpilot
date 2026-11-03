@@ -70,3 +70,80 @@ Every method got the same budget: **25 pipelines per benchmark**. Each method's 
   <img src="docs/img/convergence.png" width="49%" alt="Best-so-far speedup by number of pipelines evaluated">
   <img src="docs/img/compile_tradeoff.png" width="49%" alt="Runtime speedup vs compile time">
 </p>
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph Programs["12 C benchmarks"]
+        SRC[kernel.c<br/>deterministic input<br/>+ checksum]
+    end
+
+    subgraph LLVM["LLVM 23 toolchain"]
+        FE[clang -O0<br/>no optnone] --> BC[(base .bc)]
+        BC --> OPT[opt -passes=…]
+        OPT --> LLC[llc -O2] --> LINK[link + sign]
+        BC --> PLUG[IRFeatures<br/>C++ pass plugin]
+        BC --> REM[missed-opt<br/>remarks]
+    end
+
+    subgraph Search["Search methods (same budget)"]
+        RS[random search]
+        GA[genetic algorithm]
+        AG[LLM agent]
+        CM[XGBoost cost model<br/>ranks 3,000 candidates]
+    end
+
+    EV{{Evaluator<br/>budget · cache · log}}
+    RUN[run + time<br/>warm-up, min of 3]
+    CHK{output ==<br/>-O0 output?}
+
+    SRC --> FE
+    RS & GA & AG & CM -->|pipeline| EV --> OPT
+    LINK --> RUN --> CHK
+    CHK -- yes --> SCORE[runtime · compile time · size]
+    CHK -- no --> BAD[score = ∞]
+    SCORE & BAD --> EV
+    PLUG -.IR features.-> AG & CM
+    REM -.compiler feedback.-> AG
+    EV --> DATA[(evaluations.csv<br/>results.csv<br/>summary.json)]
+```
+
+Every candidate goes through the same path, so the **only** difference between two runs is the IR pipeline:
+
+1. `clang -O0 -Xclang -disable-O0-optnone` → unoptimized bitcode, built once per benchmark
+2. `opt -passes=<candidate>` → optimized bitcode (loop passes are nested in the right adaptors automatically)
+3. `llc -O2` → object file → linked, signed binary
+4. one untimed warm-up run, then the minimum of 3 timed runs
+5. the program's checksum must match the `-O0` build, or the candidate scores ∞
+
+## The agent loop
+
+```mermaid
+sequenceDiagram
+    participant A as LLM agent (Llama 3.1, local)
+    participant I as JSON interface
+    participant E as Evaluator
+    participant C as LLVM
+
+    loop until 25 pipelines are spent
+        A->>I: {"passes": [...], "reason": "..."}
+        alt invalid JSON / unknown pass / already tried
+            I-->>A: error, try again (max 2 retries)
+        else model keeps failing
+            I->>E: fallback: mutate the best pipeline
+        else valid
+            I->>E: pipeline
+        end
+        E->>C: compile · run · check output
+        C-->>E: runtime, compile time, size, correct?
+        E->>C: opt -pass-remarks-missed
+        C-->>A: history table + missed-optimization remarks
+    end
+```
+
+A real step from the quicksort run:
+
+> **Remarks:** `loop not vectorized: call instruction cannot be vectorized (x3)` …
+> **Agent:** `loop-rotate licm indvars sroa instcombine`, *"Apply loop rotation to simplify the loop structure, followed by LICM and indvars"*
+> **Result:** 0.229 s vs 0.240 s at `-O3`: **1.04× faster**, with a fraction of `-O3`'s passes.
