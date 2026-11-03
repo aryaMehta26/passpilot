@@ -17,6 +17,8 @@ BENCHMARKS = sorted(p.stem for p in BENCH_DIR.glob("*.c"))
 # Each pass the search may use, mapped to how it must be nested in an opt pipeline.
 # Loop passes go through the loop adaptor; licm and unswitching need MemorySSA.
 PASSES = {
+    # macro-actions: a whole standard pipeline as one step, so search can build on top of -O3 instead of from zero
+    "O1": "default<O1>", "O2": "default<O2>", "O3": "default<O3>",
     # module
     "globalopt": "globalopt", "ipsccp": "ipsccp", "deadargelim": "deadargelim",
     "globaldce": "globaldce", "constmerge": "constmerge",

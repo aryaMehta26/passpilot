@@ -28,6 +28,9 @@ SYSTEM = f"""You are a compiler optimization agent tuning LLVM IR pass pipelines
 The program starts as unoptimized IR (allocas, no SSA). Machine code generation is fixed (llc -O2);
 only the IR pass pipeline you choose changes. Correctness is checked: if output changes, the pipeline scores zero.
 
+O1, O2 and O3 are macro-actions that run clang's whole standard pipeline as one step; you may combine them
+with individual passes before or after (for example extra unrolling or vectorization after O3).
+
 Available passes (use these exact names, in the order they should run, 3 to 40 passes, repeats allowed):
 {", ".join(PASS_NAMES)}
 
