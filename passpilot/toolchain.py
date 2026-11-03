@@ -50,10 +50,16 @@ def _text_size(obj):
 
 
 def _time_runs(exe, runs, cutoff_s=None):
-    """Min wall time over `runs` runs. A first run slower than cutoff_s is not repeated: it can't win."""
+    """Min wall time over `runs` runs, after one untimed warm-up run.
+
+    The first launch of a freshly linked binary on macOS pays for code-signature checks and page-ins, which
+    can triple a short benchmark's time. Once two timed runs are both slower than cutoff_s, stop: the candidate can't win."""
+    r = _run([exe], timeout=RUN_TIMEOUT_S)
+    if r.returncode:
+        raise RuntimeError(f"exit code {r.returncode}")
     best, out = float("inf"), None
     for i in range(runs):
-        if i and cutoff_s and best > cutoff_s:
+        if i >= 2 and cutoff_s and best > cutoff_s:
             break
         t0 = time.perf_counter()
         r = _run([exe], timeout=RUN_TIMEOUT_S)
