@@ -1,7 +1,7 @@
 #include "bench.h"
 #define ROWS 60000
 #define NNZ_PER_ROW 16
-#define ITERS 30
+#define ITERS 300
 static int col[ROWS * NNZ_PER_ROW], rowptr[ROWS + 1];
 static double val[ROWS * NNZ_PER_ROW], x[ROWS], y[ROWS];
 int main(void) {

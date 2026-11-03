@@ -1,5 +1,5 @@
 #include "bench.h"
-#define N 30000000
+#define N 100000000
 static unsigned char composite[N + 1];
 int main(void) {
     for (long i = 2; i * i <= N; i++)

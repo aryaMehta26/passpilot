@@ -1,6 +1,6 @@
 #include "bench.h"
 #define N 400
-#define STEPS 60
+#define STEPS 1500
 static double a[N][N], b[N][N];
 int main(void) {
     for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) a[i][j] = lcg_unit();

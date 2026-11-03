@@ -1,5 +1,5 @@
 #include "bench.h"
-#define N 220
+#define N 600
 static double A[N][N], B[N][N], C[N][N];
 int main(void) {
     for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) { A[i][j] = lcg_unit(); B[i][j] = lcg_unit(); }

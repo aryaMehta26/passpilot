@@ -1,7 +1,7 @@
 #include "bench.h"
 #include <math.h>
 #define NB 400
-#define STEPS 40
+#define STEPS 800
 static double px[NB], py[NB], pz[NB], vx[NB], vy[NB], vz[NB], m[NB];
 int main(void) {
     for (int i = 0; i < NB; i++) { px[i] = lcg_unit(); py[i] = lcg_unit(); pz[i] = lcg_unit(); m[i] = 0.5 + lcg_unit(); vx[i] = vy[i] = vz[i] = 0; }

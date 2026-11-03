@@ -1,5 +1,5 @@
 #include "bench.h"
-#define N 1500000
+#define N 4000000
 static int v[N];
 static void qs(int *x, int lo, int hi) {
     while (lo < hi) {

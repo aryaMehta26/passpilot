@@ -1,5 +1,5 @@
 #include "bench.h"
-#define N 3000
+#define N 10000
 static char a[N], b[N];
 static int prev[N + 1], cur[N + 1];
 int main(void) {

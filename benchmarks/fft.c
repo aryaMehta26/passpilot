@@ -27,7 +27,7 @@ static void fft(double *xr, double *xi) {
 }
 int main(void) {
     for (int i = 0; i < N; i++) { re[i] = lcg_unit(); im[i] = 0; }
-    for (int r = 0; r < 12; r++) { fft(re, im); for (int i = 0; i < N; i++) { re[i] /= 256.0; im[i] /= 256.0; } }
+    for (int r = 0; r < 180; r++) { fft(re, im); for (int i = 0; i < N; i++) { re[i] /= 256.0; im[i] /= 256.0; } }
     double s = 0; for (int i = 0; i < N; i += 13) s += re[i] + im[i];
     report_f64(s); return 0;
 }
