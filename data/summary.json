@@ -1,0 +1,63 @@
+{
+  "benchmarks": 12,
+  "budget_per_method": 25,
+  "passes_in_catalog": 48,
+  "total_evaluations": 1200,
+  "invalid_candidates": 1,
+  "per_method": {
+    "agent": {
+      "geomean_speedup_vs_o3": 1.0302318954362588,
+      "best_speedup_vs_o3": 1.2276565320233819,
+      "best_bench": "crc32",
+      "wins_over_2pct": 3,
+      "within_2pct": 9,
+      "losses_over_2pct": 0,
+      "mean_compile_ratio_vs_o3": 1.1052366199372121
+    },
+    "ga": {
+      "geomean_speedup_vs_o3": 1.0414103931288723,
+      "best_speedup_vs_o3": 1.247820863998038,
+      "best_bench": "crc32",
+      "wins_over_2pct": 3,
+      "within_2pct": 9,
+      "losses_over_2pct": 0,
+      "mean_compile_ratio_vs_o3": 1.0345003558996106
+    },
+    "model": {
+      "geomean_speedup_vs_o3": 1.0324508708375753,
+      "best_speedup_vs_o3": 1.240288964377819,
+      "best_bench": "crc32",
+      "wins_over_2pct": 4,
+      "within_2pct": 7,
+      "losses_over_2pct": 1,
+      "mean_compile_ratio_vs_o3": 1.0475806904983909
+    },
+    "random": {
+      "geomean_speedup_vs_o3": 1.0391275701574259,
+      "best_speedup_vs_o3": 1.25266145444753,
+      "best_bench": "crc32",
+      "wins_over_2pct": 5,
+      "within_2pct": 7,
+      "losses_over_2pct": 0,
+      "mean_compile_ratio_vs_o3": 1.0605230469390339
+    }
+  },
+  "agent_interface": {
+    "llm_calls": 340,
+    "invalid_json": 0,
+    "unknown_pass_repairs": 0,
+    "duplicates": 40,
+    "fallbacks": 0,
+    "llm_errors": 0,
+    "build_failures": 0,
+    "wrong_outputs": 0,
+    "llm_seconds": 3090.7
+  },
+  "costmodel": {
+    "mean_spearman": 0.43403855405151076,
+    "top1_within_5pct": 8,
+    "benchmarks": 12
+  },
+  "measurement_minutes": 20.6,
+  "llm_minutes": 51.5
+}
