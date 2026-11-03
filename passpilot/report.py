@@ -41,9 +41,12 @@ def _speedup_chart(res):
 def _convergence_chart(ev, bases):
     o3 = bases[bases.baseline == "O3"].set_index("bench").runtime_s
     fig, ax = plt.subplots(figsize=(6.5, 4))
-    for m in [m for m in METHODS if m in set(ev.method)]:
+    methods = [m for m in METHODS if m in set(ev.method)]
+    # Only benchmarks every method finished, so the curves average over the same programs.
+    common = set.intersection(*(set(ev[ev.method == m].bench) for m in methods))
+    for m in methods:
         curves = []
-        for b, g in ev[ev.method == m].groupby("bench"):
+        for b, g in ev[(ev.method == m) & ev.bench.isin(common)].groupby("bench"):
             rt = g.sort_values("step").runtime_s.where(g.correct.astype(bool), np.inf).to_numpy()
             best = np.minimum.accumulate(rt)
             curves.append(np.log(o3[b] / best))
