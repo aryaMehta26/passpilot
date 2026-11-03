@@ -145,7 +145,9 @@ def summarize(res, budget, wall_s):
         "costmodel": {"mean_spearman": float(held.spearman.mean()) if not held.empty else None,
                       "top1_within_5pct": int(held.top1_within_5pct.sum()) if not held.empty else None,
                       "benchmarks": int(len(held))},
-        "wall_clock_minutes": round(wall_s / 60, 1),
+        # Summed from the logs, so it stays right when a run is resumed.
+        "measurement_minutes": round(df.eval_s.sum() / 60, 1),
+        "llm_minutes": round(agg["llm_seconds"] / 60, 1),
     }
     (DATA_DIR / "summary.json").write_text(json.dumps(summary, indent=2))
     return summary
