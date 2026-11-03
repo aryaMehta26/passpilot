@@ -213,3 +213,23 @@ passpilot/
 └── docs/                  # header and charts
 ```
 </details>
+
+## Limitations
+
+- **One machine, one compiler.** Apple M4 with LLVM 23. Speedups from pass ordering are hardware-specific; the same pipelines may not win on x86.
+- **Small kernels.** 12 single-file programs, not whole applications. Inlining and interprocedural passes matter more in real code.
+- **25 tries per method.** Enough to compare methods fairly, not enough to find each program's true optimum.
+- **The agent is a local 8B model.** A stronger model, or fine-tuning on these traces, is the obvious next experiment.
+- **Wall-clock timing.** Minimum of repeated runs after warm-up, re-confirmed 10×, but still subject to OS noise; differences under ~1% are ties.
+
+## What's next
+
+- [ ] GPU target: tune pipelines for the NVPTX backend on CUDA kernels and measure on an NVIDIA GPU
+- [ ] MLIR: tune lowering pipelines for linalg/affine programs
+- [ ] Reinforcement learning policy trained on the 1,200 logged evaluations
+- [ ] Larger benchmarks (PolyBench, LLVM test-suite) and cross-machine generalization
+- [ ] Stronger agent models and agent + cost-model hybrids (agent proposes, model filters)
+
+## License
+
+Apache License 2.0. Built by [Arya Mehta](https://github.com/aryaMehta26).
