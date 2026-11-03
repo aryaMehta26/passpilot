@@ -10,7 +10,7 @@ LINKER = os.environ.get("PASSPILOT_LINKER", "/usr/bin/clang")
 PLUGIN = ROOT / "build" / "IRFeatures.dylib"
 BENCH_DIR = ROOT / "benchmarks"
 BUILD_DIR = ROOT / "build"
-DATA_DIR = ROOT / "data"
+DATA_DIR = Path(os.environ.get("PASSPILOT_DATA", ROOT / "data"))
 
 BENCHMARKS = sorted(p.stem for p in BENCH_DIR.glob("*.c"))
 
@@ -48,5 +48,5 @@ BASELINES = {"O0": None, "O1": "default<O1>", "O2": "default<O2>", "O3": "defaul
 MAX_PIPELINE_LEN = 40
 SEARCH_RUNS = 3      # timed runs per candidate during search (min is kept)
 CONFIRM_RUNS = 10    # timed runs when re-measuring the final best and the baselines
-BUDGET = 40          # candidate pipelines each method may evaluate per benchmark
+BUDGET = 25          # candidate pipelines each method may evaluate per benchmark
 RUN_TIMEOUT_S = 30
