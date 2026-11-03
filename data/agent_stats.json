@@ -1,0 +1,60 @@
+{
+  "conv2d": {
+    "llm_calls": 27,
+    "llm_seconds": 229.67131908395095,
+    "duplicates": 2
+  },
+  "crc32": {
+    "llm_calls": 28,
+    "llm_seconds": 241.07641316603986,
+    "duplicates": 3
+  },
+  "fft": {
+    "llm_calls": 31,
+    "llm_seconds": 295.98060295701725,
+    "duplicates": 6
+  },
+  "histogram": {
+    "llm_calls": 28,
+    "llm_seconds": 265.82863979117246,
+    "duplicates": 3
+  },
+  "lcs": {
+    "llm_calls": 25,
+    "llm_seconds": 242.36727387396968
+  },
+  "matmul": {
+    "llm_calls": 28,
+    "llm_seconds": 275.2643258338794,
+    "duplicates": 3
+  },
+  "nbody": {
+    "llm_calls": 30,
+    "llm_seconds": 312.603526791936,
+    "duplicates": 5
+  },
+  "quicksort": {
+    "llm_calls": 33,
+    "llm_seconds": 252.91514058204484,
+    "duplicates": 8
+  },
+  "sieve": {
+    "llm_calls": 29,
+    "llm_seconds": 238.59369616393815,
+    "duplicates": 4
+  },
+  "spmv": {
+    "llm_calls": 25,
+    "llm_seconds": 247.07063258305425
+  },
+  "stencil": {
+    "llm_calls": 29,
+    "llm_seconds": 256.4250537469925,
+    "duplicates": 4
+  },
+  "strsearch": {
+    "llm_calls": 27,
+    "llm_seconds": 232.8627201668569,
+    "duplicates": 2
+  }
+}
