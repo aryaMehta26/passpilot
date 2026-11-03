@@ -49,9 +49,12 @@ def _text_size(obj):
         return obj.stat().st_size
 
 
-def _time_runs(exe, runs):
+def _time_runs(exe, runs, cutoff_s=None):
+    """Min wall time over `runs` runs. A first run slower than cutoff_s is not repeated: it can't win."""
     best, out = float("inf"), None
-    for _ in range(runs):
+    for i in range(runs):
+        if i and cutoff_s and best > cutoff_s:
+            break
         t0 = time.perf_counter()
         r = _run([exe], timeout=RUN_TIMEOUT_S)
         dt = time.perf_counter() - t0
@@ -98,11 +101,11 @@ def reference_output(bench):
     return _reference[bench]
 
 
-def measure(bench, opt_pipeline, runs, tag=None):
+def measure(bench, opt_pipeline, runs, tag=None, cutoff_s=None):
     tag = tag or hashlib.sha1((opt_pipeline or "O0").encode()).hexdigest()[:12]
     try:
         exe, obj, compile_s = build(bench, opt_pipeline, tag)
-        runtime_s, out = _time_runs(exe, runs)
+        runtime_s, out = _time_runs(exe, runs, cutoff_s)
     except (RuntimeError, subprocess.TimeoutExpired) as e:
         return Measurement(ok=False, error=str(e)[:300])
     correct = out == reference_output(bench)
@@ -110,5 +113,5 @@ def measure(bench, opt_pipeline, runs, tag=None):
                        text_bytes=_text_size(obj), error="" if correct else "output differs from -O0")
 
 
-def measure_passes(bench, passes, runs):
-    return measure(bench, to_opt(passes), runs)
+def measure_passes(bench, passes, runs, cutoff_s=None):
+    return measure(bench, to_opt(passes), runs, cutoff_s=cutoff_s)
